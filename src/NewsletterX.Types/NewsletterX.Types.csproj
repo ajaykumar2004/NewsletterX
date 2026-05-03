@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!--
+    ARCHITECTURAL DECISION: Types Project
+    ═════════════════════════════════════
+    This is the leaf node in the dependency graph — it has NO project references.
+    Contains: Enums, Constants, Shared types (e.g., Result<T>), Extension methods for primitives.
+    
+    Why separate? 
+    - Prevents circular dependencies
+    - Can be referenced by ALL other projects
+    - Changes here rarely break consumers (stable contracts)
+    
+    TRANSFERABLE PATTERN: Every microservice should have a "Types" or "Common" project
+    at the bottom of the dependency tree for shared primitives.
+  -->
+
+</Project>

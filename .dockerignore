@@ -1,0 +1,56 @@
+# =============================================================================
+# Docker Ignore File
+# =============================================================================
+# Excludes files from Docker build context to:
+# 1. Speed up builds (smaller context = faster COPY)
+# 2. Prevent secrets from leaking into images
+# 3. Avoid cache invalidation from irrelevant changes
+# =============================================================================
+
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+
+# IDE and editor files
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Test results
+**/TestResults/
+**/coverage/
+
+# Documentation (not needed at runtime)
+*.md
+docs/
+
+# Local development files
+**/appsettings.Development.json
+**/appsettings.Local.json
+.env
+.env.*
+
+# Logs
+**/logs/
+**/*.log
+
+# Deployment (we build from source, not from compose)
+deployment/
+
+# Test projects (not needed in production image)
+test/
+
+# OS files
+.DS_Store
+Thumbs.db
+

@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!--
+    ARCHITECTURAL DECISION: Providers Project (Business Logic Layer)
+    ═════════════════════════════════════════════════════════════════
+    Contains: Business logic interfaces + implementations.
+    Examples: IAuthProvider (login, register), ISubscriptionProvider, ISnsPublisher.
+    
+    Why "Providers" not "Services"?
+    - Avoids confusion with ASP.NET Core's IHostedService, BackgroundService
+    - "Provider" implies "provides a capability" — authentication, email dispatch
+    - This is a naming convention from your fintech stack, not a universal standard
+    
+    Call Chain: Controller → Provider → Repository → DB/AWS
+    ───────────────────────────────────────────────────────
+    - Controllers: HTTP concerns (routing, model binding, response codes)
+    - Providers: Business rules (validation, orchestration, transformation)
+    - Repositories: Data access (queries, commands)
+    
+    Why BCrypt over PBKDF2 or Argon2?
+    - BCrypt is the "safe default" — adaptive, widely audited, hard to misconfigure
+    - Built-in salt generation, no separate salt storage needed
+    - Argon2 is theoretically better but less mature in .NET ecosystem
+    
+    TRANSFERABLE PATTERN: This layered architecture works for any CRUD+business-logic API.
+    The call chain direction is always: HTTP → Logic → Data.
+  -->
+
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.0" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.500" />
+    <PackageReference Include="AWSSDK.SQS" Version="3.7.500" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NewsletterX.Repositories\NewsletterX.Repositories.csproj" />
+    <ProjectReference Include="..\NewsletterX.ContractModels\NewsletterX.ContractModels.csproj" />
+    <ProjectReference Include="..\NewsletterX.Types\NewsletterX.Types.csproj" />
+  </ItemGroup>
+
+</Project>

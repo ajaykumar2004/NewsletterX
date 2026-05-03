@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!--
+    ARCHITECTURAL DECISION: ContractModels Project
+    ══════════════════════════════════════════════
+    Contains: Request DTOs, Response DTOs, FluentValidation validators.
+    
+    Why FluentValidation over DataAnnotations?
+    - Testable: Validators are classes, not attributes
+    - Composable: Reuse validation rules across DTOs
+    - Complex rules: Easy async validation, cross-property validation
+    - DI-friendly: Validators auto-discovered and registered
+    
+    Why separate from EntityModels?
+    - API contracts evolve independently from DB schema
+    - Prevents leaking DB concerns (navigation properties, shadow props) to API
+    - Enables versioning: V1 contracts vs V2 contracts
+    
+    TRANSFERABLE PATTERN: FluentValidation + separate contracts is standard
+    for any non-trivial API. Data Annotations are fine for simple CRUD.
+  -->
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NewsletterX.Types\NewsletterX.Types.csproj" />
+  </ItemGroup>
+
+</Project>

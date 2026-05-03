@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <!--
+    ARCHITECTURAL DECISION: Test Project
+    ════════════════════════════════════
+    Contains: Unit tests, Integration tests (with WebApplicationFactory).
+    
+    Testing Strategy:
+    ─────────────────
+    - Unit Tests: Mock repositories, test Providers in isolation
+    - Integration Tests: Use WebApplicationFactory + LocalStack containers
+    - No tests for Controllers directly — test via integration tests
+    
+    Why Moq?
+    - Most popular .NET mocking library
+    - Easy interface mocking: Mock<IUserRepository>().Setup(...)
+    - Verify interactions: mock.Verify(x => x.CreateAsync(...), Times.Once)
+    
+    Why FluentAssertions?
+    - Readable assertions: result.Should().BeEquivalentTo(expected)
+    - Better error messages than xUnit's Assert
+    
+    TRANSFERABLE PATTERN: Unit test Providers, integration test Controllers.
+    This gives you fast feedback (unit) + confidence (integration).
+  -->
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="FluentAssertions" Version="6.12.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\NewsletterX.Host\NewsletterX.Host.csproj" />
+    <ProjectReference Include="..\..\src\NewsletterX.Providers\NewsletterX.Providers.csproj" />
+    <ProjectReference Include="..\..\src\NewsletterX.Repositories\NewsletterX.Repositories.csproj" />
+    <ProjectReference Include="..\..\src\NewsletterX.ContractModels\NewsletterX.ContractModels.csproj" />
+    <ProjectReference Include="..\..\src\NewsletterX.Types\NewsletterX.Types.csproj" />
+  </ItemGroup>
+
+</Project>

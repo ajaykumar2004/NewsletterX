@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!--
+    ARCHITECTURAL DECISION: Api Project (HTTP Layer)
+    ═══════════════════════════════════════════════
+    Contains: Controllers, Middleware, Action Filters, API-specific concerns.
+    
+    Why separate from Host?
+    - Host = startup, DI, configuration (Program.cs)
+    - Api = HTTP handling (controllers, middleware)
+    - Enables testing Api layer with WebApplicationFactory without Host details
+    - Cleaner separation: Host can be swapped (console app, Lambda) while Api stays same
+    
+    Middleware Order Matters:
+    ─────────────────────────
+    1. CorrelationIdMiddleware (first — sets logging context)
+    2. ExceptionHandlingMiddleware (catches all unhandled exceptions)
+    3. Authentication/Authorization
+    4. Rate Limiting
+    5. Routing → Controllers
+    
+    TRANSFERABLE PATTERN: Controllers call Providers, never Repositories directly.
+    This keeps HTTP concerns (status codes, headers) separate from business logic.
+  -->
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="4.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NewsletterX.Providers\NewsletterX.Providers.csproj" />
+    <ProjectReference Include="..\NewsletterX.ContractModels\NewsletterX.ContractModels.csproj" />
+    <ProjectReference Include="..\NewsletterX.Types\NewsletterX.Types.csproj" />
+  </ItemGroup>
+
+</Project>

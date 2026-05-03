@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!--
+    ARCHITECTURAL DECISION: EntityModels Project
+    ════════════════════════════════════════════
+    Contains: EF Core entities (PostgreSQL), DynamoDB document models.
+    
+    Why EF Core here?
+    - DbContext and entity classes live together
+    - Migrations are generated from this assembly
+    - Keeps data schema concerns isolated
+    
+    Why DynamoDB models here too?
+    - Single source of truth for all persistence shapes
+    - Both are "entity models" — how data is stored
+    - ContractModels are "DTOs" — how data is transferred
+    
+    TRANSFERABLE PATTERN: Separate entity models from API contracts.
+    Entities can have DB-specific attributes; contracts stay clean.
+  -->
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.11" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.401" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NewsletterX.Types\NewsletterX.Types.csproj" />
+  </ItemGroup>
+
+</Project>

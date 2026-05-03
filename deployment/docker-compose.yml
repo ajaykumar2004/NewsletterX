@@ -1,0 +1,131 @@
+# =============================================================================
+# NewsletterX Local Development Infrastructure
+# =============================================================================
+# 
+# ARCHITECTURAL DECISION: Why docker-compose for local dev?
+# ─────────────────────────────────────────────────────────
+# 1. Reproducible: Every developer gets identical infrastructure
+# 2. No cloud costs: LocalStack emulates AWS services for free
+# 3. Fast iteration: No deploy/wait cycles for infrastructure changes
+# 4. Realistic: Same SDK code works against LocalStack and real AWS
+#
+# Services:
+# - postgres: Primary database for users, subscriptions
+# - localstack: AWS emulation (SNS, SQS, DynamoDB)
+#
+# TRANSFERABLE PATTERN: This docker-compose structure works for any 
+# microservice using PostgreSQL + AWS. Just tweak the init script.
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database
+  # ---------------------------------------------------------------------------
+  # WHY POSTGRESQL over MySQL/SQL Server?
+  # - Excellent JSON support (JSONB) for flexible columns
+  # - Superior index types (GIN, GiST, BRIN) for complex queries
+  # - Free, open source, battle-tested at scale
+  # - Best EF Core provider (Npgsql) with advanced features
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: newsletterx-postgres
+    environment:
+      POSTGRES_USER: newsletterx
+      POSTGRES_PASSWORD: newsletterx_dev_password
+      POSTGRES_DB: newsletterx
+    ports:
+      - "5432:5432"
+    volumes:
+      # Persist data across container restarts (optional for dev)
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U newsletterx -d newsletterx"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    # ---------------------------------------------------------------------------
+    # CONNECTION POOL AWARENESS (Critical for Production)
+    # ---------------------------------------------------------------------------
+    # PostgreSQL default max_connections = 100
+    # Npgsql default pool size = 100 per connection string
+    # 
+    # In production with multiple instances:
+    # - 3 instances × 100 pool size = 300 connections needed
+    # - Either increase max_connections or use PgBouncer
+    #
+    # Connection string tuning:
+    # "Max Pool Size=50;Connection Idle Lifetime=300;Connection Pruning Interval=10"
+    # ---------------------------------------------------------------------------
+
+  # ---------------------------------------------------------------------------
+  # LocalStack - AWS Service Emulation
+  # ---------------------------------------------------------------------------
+  # SERVICES WE USE:
+  # - SNS: Newsletter dispatch fan-out (one publish → multiple queues)
+  # - SQS: Email send queue, Audit log queue
+  # - DynamoDB: Append-only email dispatch audit log
+  #
+  # WHY LOCALSTACK?
+  # - Same AWS SDK code works locally and in production
+  # - No AWS account/credentials needed for development
+  # - Fast: No network latency to AWS
+  # - Free: LocalStack Community covers SNS, SQS, DynamoDB
+  #
+  # GOTCHA: LocalStack behavior may differ slightly from real AWS
+  # Always run integration tests against real AWS before production deploy
+  # ---------------------------------------------------------------------------
+  localstack:
+    image: localstack/localstack:3.8
+    container_name: newsletterx-localstack
+    ports:
+      - "4566:4566"           # LocalStack Gateway (all services)
+      - "4510-4559:4510-4559" # External service ports (if needed)
+    environment:
+      # Services to enable (case-insensitive)
+      SERVICES: sns,sqs,dynamodb
+      # Debug logging (set to 1 for troubleshooting)
+      DEBUG: 0
+      # Persist data between restarts (useful for dev)
+      PERSISTENCE: 1
+      # Data directory for persistence
+      LOCALSTACK_DATA_DIR: /var/lib/localstack/data
+    volumes:
+      # Mount init script to create resources on startup
+      - ./localstack-init:/etc/localstack/init/ready.d
+      # Persist LocalStack data
+      - localstack_data:/var/lib/localstack
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# Named volumes for data persistence
+volumes:
+  postgres_data:
+    driver: local
+  localstack_data:
+    driver: local
+
+# =============================================================================
+# USAGE:
+# =============================================================================
+# Start infrastructure:
+#   docker-compose -f deployment/docker-compose.yml up -d
+#
+# View logs:
+#   docker-compose -f deployment/docker-compose.yml logs -f localstack
+#
+# Stop and remove:
+#   docker-compose -f deployment/docker-compose.yml down
+#
+# Stop and remove WITH data:
+#   docker-compose -f deployment/docker-compose.yml down -v
+#
+# Verify LocalStack resources:
+#   aws --endpoint-url=http://localhost:4566 sns list-topics
+#   aws --endpoint-url=http://localhost:4566 sqs list-queues
+#   aws --endpoint-url=http://localhost:4566 dynamodb list-tables
+# =============================================================================
+

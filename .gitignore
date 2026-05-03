@@ -1,0 +1,90 @@
+# =============================================================================
+# NewsletterX .gitignore
+# =============================================================================
+
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+
+# IDE and editor files
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.swp
+*~
+
+# User-specific files
+*.rsuser
+*.userprefs
+
+# Rider
+.idea/
+*.sln.iml
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+project.lock.json
+project.fragment.lock.json
+
+# Test results
+**/TestResults/
+*.trx
+*.coverage
+*.coveragexml
+coverage/
+
+# Logs
+**/logs/
+**/*.log
+nlog-*.log
+
+# Local development
+**/appsettings.Local.json
+.env
+.env.*
+*.local
+
+# Secrets - NEVER commit these!
+**/secrets/
+**/*.pfx
+**/*.pem
+**/*.key
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker
+**/docker-compose.override.yml
+
+# LocalStack data (persisted state)
+localstack_data/
+
+# EF Core migrations (keep these, but ignore local db files)
+*.db
+*.db-journal
+*.sqlite
+
+# Publish output
+publish/
+

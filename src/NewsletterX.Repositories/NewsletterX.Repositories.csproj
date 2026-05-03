@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!--
+    ARCHITECTURAL DECISION: Repositories Project
+    ════════════════════════════════════════════
+    Contains: Repository interfaces + implementations for PostgreSQL (via EF Core) and DynamoDB.
+    
+    Why Repository Pattern?
+    - Abstracts data access: Providers don't know if it's EF Core, Dapper, or raw SQL
+    - Testable: Mock IUserRepository in unit tests, no DB needed
+    - Single Responsibility: Repositories handle queries, not business logic
+    
+    Why interfaces here (not in a separate Abstractions project)?
+    - YAGNI: For a single service, co-locating interfaces with implementations is simpler
+    - If you ever need to share interfaces across services, extract to NewsletterX.Abstractions
+    
+    Connection Pool Awareness (Critical for Production):
+    ────────────────────────────────────────────────────
+    - Npgsql: Connection pooling is automatic via connection string. Default pool size = 100.
+      Configure `Max Pool Size`, `Connection Idle Lifetime` in connection string.
+    - DynamoDB: The IAmazonDynamoDB client MUST be a singleton. It manages its own HTTP 
+      connection pool. Creating per-request = exhausting sockets + performance disaster.
+    
+    TRANSFERABLE PATTERN: Interface-based repositories with DI registration.
+    Works the same for any data store.
+  -->
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.11" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.401" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NewsletterX.EntityModels\NewsletterX.EntityModels.csproj" />
+    <ProjectReference Include="..\NewsletterX.Types\NewsletterX.Types.csproj" />
+  </ItemGroup>
+
+</Project>
